@@ -60,7 +60,7 @@ void ProjektPflege::inDatenbankSchreiben()
         QSqlQuery qu;
         qu.clear();
         if (!qu.exec("INSERT INTO Themen (Name, Erstellt_am, Erstellt_von, Beschreibung, Aktiv) VALUES ("
-                "'"+titel->text()+"', "
+                "'"+titel->text().replace('\'',"\'\'")+"', "
                 "'"+QDate::currentDate().toString("yyyyMMdd")+"', "
                 "'"+bearbeiter->currentData().toString()+"', "
                 "'"+beschreibung->toPlainText().replace('\'',"\'\'")+"', "

@@ -54,7 +54,8 @@ void BenutzerPflege::andererBenutzerGewaehlt(int)
     } else {    // Benutzer aendern
         QSqlQuery qu;
         qu.clear();
-        if (!qu.exec("SELECT Name, Systemnutzer FROM Benutzer WHERE ID='"+namenWaehler->currentData().toString()+"'")) qDebug() << qu.lastError().text();
+        if (!qu.exec("SELECT Name, Systemnutzer FROM Benutzer WHERE ID='"+namenWaehler->currentData().toString()+"'"))
+            qDebug() << qu.lastError().text();
         if (qu.next()){
             name->setText(qu.value(0).toString());
             systemname->setText(qu.value(1).toString());
@@ -70,15 +71,20 @@ void BenutzerPflege::schreibeInDatenbank()
         QSqlQuery qu;
         qu.clear();
         if (!qu.exec("INSERT INTO Benutzer (Name, Systemnutzer, Letztes_Thema) VALUES ("
-                     "'"+name->text()+"', "
-                     "'"+systemname->text()+"', "
+                     "'"+name->text().replace('\'',"\'\'")+"', "
+                     "'"+systemname->text().replace('\'',"\'\'")+"', "
                      "'0'"
                      ")")) qDebug() << qu.lastError().text();
         qu.finish();
     } else {    // Datensatz aendern
         QSqlQuery qu;
         qu.clear();
-        if (!qu.exec("UPDATE Benutzer SET Name='"+name->text()+"', Systemnutzer='"+systemname->text()+"' WHERE ID='"+namenWaehler->currentData().toString()+"'")) qDebug() << qu.lastError().text();
+        if (!qu.exec("UPDATE Benutzer SET "
+                        "Name='"+name->text().replace('\'',"\'\'")+
+                     "', Systemnutzer='"+systemname->text().replace('\'',"\'\'")+
+                     "' WHERE ID='"+namenWaehler->currentData().toString()+"'"))
+            qDebug() << qu.lastError().text();
+
         qu.finish();
     }
     emit aenderungen();

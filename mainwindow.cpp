@@ -6,7 +6,8 @@ MainWindow::MainWindow(QWidget *parent)
     QFileInfo dbFile(DATENBANKFILE);
     bool neueDatenbank{false};
     if (!dbFile.exists()){
-        if (QMessageBox::question(this, "Datenbank nicht vorhanden", "Die Datenbank ist nicht vorhanden. Soll eine neue erstellt werden?") == QMessageBox::Yes){
+        if (QMessageBox::question(this, "Datenbank nicht vorhanden",
+                                  "Die Datenbank ist nicht vorhanden. Soll eine neue erstellt werden?") == QMessageBox::Yes){
             neueDatenbank = true;
         } else {
             exit(1);
@@ -82,7 +83,8 @@ void MainWindow::guiBauen()
     QString username = QString(getenv("USERNAME"));
     QSqlQuery qu;
     qu.clear();
-    if (!qu.exec("SELECT ID, Letztes_Thema FROM Benutzer WHERE Systemnutzer='"+username+"'")) qDebug() << qu.lastError().text();
+    if (!qu.exec("SELECT ID, Letztes_Thema FROM Benutzer WHERE Systemnutzer='"+username+"'"))
+        qDebug() << qu.lastError().text();
     if (qu.next()){
         bearbeiter->setCurrentIndex(bearbeiter->findData(qu.value(0)));
         projekte->setCurrentIndex(projekte->findData(qu.value(1)));
@@ -132,11 +134,14 @@ void MainWindow::inDatenbankSchreiben()
             "'"+bearbeiter->currentData().toString()+"', "
             "'"+QDate::currentDate().toString("yyyyMMdd")+"', "
             "'"+projekte->currentData().toString()+"', "
-            "'"+textfeld->text()+"'"
+            "'"+textfeld->text().replace('\'',"\'\'")+"'"
             ")")) qDebug() << qu.lastError().text();
     qu.finish();
     qu.clear();
-    if (!qu.exec("UPDATE Benutzer SET Letztes_Thema='"+projekte->currentData().toString()+"' WHERE ID='"+bearbeiter->currentData().toString()+"'")) qDebug() << qu.lastError().text();
+    if (!qu.exec("UPDATE Benutzer SET Letztes_Thema='"+projekte->currentData().toString()+
+                 "' WHERE ID='"+bearbeiter->currentData().toString()+"'"))
+        qDebug() << qu.lastError().text();
+
     qu.finish();
     textfeld->clear();
     tabelleFuellen();
