@@ -56,13 +56,13 @@ ProjektPflege::ProjektPflege(QWidget *parent) :
 
 void ProjektPflege::inDatenbankSchreiben()
 {
-    if (projektWaehler->currentData().toInt() == -1){ // create new entry
+    if (projektWaehler->itemData(projektWaehler->currentIndex()).toInt() == -1){ // create new entry
         QSqlQuery qu;
         qu.clear();
         if (!qu.exec("INSERT INTO Themen (Name, Erstellt_am, Erstellt_von, Beschreibung, Aktiv) VALUES ("
                 "'"+titel->text().replace('\'',"\'\'")+"', "
                 "'"+QDate::currentDate().toString("yyyyMMdd")+"', "
-                "'"+bearbeiter->currentData().toString()+"', "
+                "'"+bearbeiter->itemData(bearbeiter->currentIndex()).toString()+"', "
                 "'"+beschreibung->toPlainText().replace('\'',"\'\'")+"', "
                 "'"+QString((aktiv->isChecked() ? "1" : "0"))+"'"
                 ")")) qDebug() << qu.lastError().text();
@@ -70,8 +70,8 @@ void ProjektPflege::inDatenbankSchreiben()
     } else { // Edit existing entry
         QSqlQuery qu;
         qu.clear();
-        if (!qu.exec("UPDATE Themen SET Name='"+titel->text()+"', Erstellt_von='"+bearbeiter->currentData().toString()+"', Beschreibung='"+beschreibung->toPlainText().replace('\'',"\'\'")+"', Aktiv='"+QString(aktiv->isChecked() ? "1" : "0")+"'"
-                     " WHERE ID='"+projektWaehler->currentData().toString()+"'")) qDebug() << qu.lastError().text();
+        if (!qu.exec("UPDATE Themen SET Name='"+titel->text()+"', Erstellt_von='"+bearbeiter->itemData(bearbeiter->currentIndex()).toString()+"', Beschreibung='"+beschreibung->toPlainText().replace('\'',"\'\'")+"', Aktiv='"+QString(aktiv->isChecked() ? "1" : "0")+"'"
+                     " WHERE ID='"+projektWaehler->itemData(projektWaehler->currentIndex()).toString()+"'")) qDebug() << qu.lastError().text();
         qu.finish();
     }
     emit aenderungen();
@@ -80,7 +80,7 @@ void ProjektPflege::inDatenbankSchreiben()
 
 void ProjektPflege::gewaehltesProjektGeaendert(int)
 {
-    if (projektWaehler->currentData().toInt() == -1){
+    if (projektWaehler->itemData(projektWaehler->currentIndex()).toInt() == -1){
         bearbeiter->setCurrentIndex(-1);
         aktiv->setChecked(false);
         titel->clear();
@@ -88,7 +88,7 @@ void ProjektPflege::gewaehltesProjektGeaendert(int)
     }
     QSqlQuery qu;
     qu.clear();
-    if (!qu.exec("SELECT NAME, Erstellt_von, Aktiv, Beschreibung FROM Themen WHERE ID='"+projektWaehler->currentData().toString()+"'"))
+    if (!qu.exec("SELECT NAME, Erstellt_von, Aktiv, Beschreibung FROM Themen WHERE ID='"+projektWaehler->itemData(projektWaehler->currentIndex()).toString()+"'"))
         qDebug() << qu.lastError().text();
     if (qu.next()){
         bearbeiter->setCurrentIndex(bearbeiter->findData(qu.value(1)));

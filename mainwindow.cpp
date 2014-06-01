@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     guiBauen();
     this->resize(800,500);
-
+    textfeld->setFocus();
 }
 
 MainWindow::~MainWindow()
@@ -91,7 +91,7 @@ void MainWindow::guiBauen()
     }
     qu.finish();
 
-    connect(okButton,   &QPushButton::clicked,      this, &MainWindow::inDatenbankSchreiben);
+    connect(okButton,  &QPushButton::clicked,      this, &MainWindow::inDatenbankSchreiben);
     connect(textfeld,  &QLineEdit::returnPressed,  this, &MainWindow::inDatenbankSchreiben);
 }
 
@@ -131,15 +131,15 @@ void MainWindow::inDatenbankSchreiben()
     QSqlQuery qu;
     qu.clear();
     if (!qu.exec("INSERT INTO Eintraege (Eingetragen_von, Eingetragen_am, Thema, Text) VALUES ("
-            "'"+bearbeiter->currentData().toString()+"', "
+            "'"+bearbeiter->itemData(bearbeiter->currentIndex()).toString()+"', "
             "'"+QDate::currentDate().toString("yyyyMMdd")+"', "
-            "'"+projekte->currentData().toString()+"', "
+            "'"+projekte->itemData(projekte->currentIndex()).toString()+"', "
             "'"+textfeld->text().replace('\'',"\'\'")+"'"
             ")")) qDebug() << qu.lastError().text();
     qu.finish();
     qu.clear();
-    if (!qu.exec("UPDATE Benutzer SET Letztes_Thema='"+projekte->currentData().toString()+
-                 "' WHERE ID='"+bearbeiter->currentData().toString()+"'"))
+    if (!qu.exec("UPDATE Benutzer SET Letztes_Thema='"+projekte->itemData(projekte->currentIndex()).toString()+
+                 "' WHERE ID='"+bearbeiter->itemData(bearbeiter->currentIndex()).toString()+"'"))
         qDebug() << qu.lastError().text();
 
     qu.finish();

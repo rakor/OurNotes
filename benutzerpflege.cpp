@@ -49,13 +49,13 @@ void BenutzerPflege::guiBauen()
 
 void BenutzerPflege::andererBenutzerGewaehlt(int)
 {
-    if (namenWaehler->currentData().toInt() == -1){ // Neuen Benutzer anlegen
+    if (namenWaehler->itemData(namenWaehler->currentIndex()).toInt() == -1){ // Neuen Benutzer anlegen
         name->clear();
         systemname->setText(QString(getenv(USERENVVAR)));
     } else {    // Benutzer aendern
         QSqlQuery qu;
         qu.clear();
-        if (!qu.exec("SELECT Name, Systemnutzer FROM Benutzer WHERE ID='"+namenWaehler->currentData().toString()+"'"))
+        if (!qu.exec("SELECT Name, Systemnutzer FROM Benutzer WHERE ID='"+namenWaehler->itemData(namenWaehler->currentIndex()).toString()+"'"))
             qDebug() << qu.lastError().text();
         if (qu.next()){
             name->setText(qu.value(0).toString());
@@ -68,7 +68,7 @@ void BenutzerPflege::andererBenutzerGewaehlt(int)
 void BenutzerPflege::schreibeInDatenbank()
 {
     if (name->text().isEmpty()) return;
-    if (namenWaehler->currentData().toInt() == -1){ // Neuer Datensatz
+    if (namenWaehler->itemData(namenWaehler->currentIndex()).toInt() == -1){ // Neuer Datensatz
         QSqlQuery qu;
         qu.clear();
         if (!qu.exec("INSERT INTO Benutzer (Name, Systemnutzer, Letztes_Thema) VALUES ("
@@ -83,7 +83,7 @@ void BenutzerPflege::schreibeInDatenbank()
         if (!qu.exec("UPDATE Benutzer SET "
                         "Name='"+name->text().replace('\'',"\'\'")+
                      "', Systemnutzer='"+systemname->text().replace('\'',"\'\'")+
-                     "' WHERE ID='"+namenWaehler->currentData().toString()+"'"))
+                     "' WHERE ID='"+namenWaehler->itemData(namenWaehler->currentIndex()).toString()+"'"))
             qDebug() << qu.lastError().text();
 
         qu.finish();
