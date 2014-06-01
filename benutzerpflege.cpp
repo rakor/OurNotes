@@ -39,7 +39,8 @@ void BenutzerPflege::guiBauen()
     }
     qu.finish();
 
-    systemname->setText(QString(getenv("USERNAME")));
+    systemname->setText(QString(getenv(USERENVVAR)));
+
 
     connect (namenWaehler,      SIGNAL(currentIndexChanged(int)),   this, SLOT(andererBenutzerGewaehlt(int)));
     connect (abbrechenButton,   &QPushButton::clicked,              this, &BenutzerPflege::close);
@@ -50,7 +51,7 @@ void BenutzerPflege::andererBenutzerGewaehlt(int)
 {
     if (namenWaehler->currentData().toInt() == -1){ // Neuen Benutzer anlegen
         name->clear();
-        systemname->setText(QString(getenv("USERNAME")));
+        systemname->setText(QString(getenv(USERENVVAR)));
     } else {    // Benutzer aendern
         QSqlQuery qu;
         qu.clear();

@@ -14,6 +14,8 @@
 #include <QDebug>
 #include <QTextEdit>
 
+#include "global.h"
+
 class ProjektPflege : public QDialog
 {
     Q_OBJECT

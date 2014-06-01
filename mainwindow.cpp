@@ -80,7 +80,7 @@ void MainWindow::guiBauen()
     // Benutzer Fuellen
     benutzerFuellen();
 
-    QString username = QString(getenv("USERNAME"));
+    QString username = QString(getenv(USERENVVAR));
     QSqlQuery qu;
     qu.clear();
     if (!qu.exec("SELECT ID, Letztes_Thema FROM Benutzer WHERE Systemnutzer='"+username+"'"))

@@ -12,6 +12,8 @@
 #include <QtSql/QSqlError>
 #include <QDebug>
 
+#include "global.h"
+
 class BenutzerPflege : public QDialog
 {
     Q_OBJECT

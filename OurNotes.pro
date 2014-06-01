@@ -21,7 +21,8 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     projektpflege.h \
-    benutzerpflege.h
+    benutzerpflege.h \
+    global.h
 
 OTHER_FILES += \
     README

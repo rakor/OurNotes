@@ -25,6 +25,7 @@
 #include <QApplication>
 #include "projektpflege.h"
 #include "benutzerpflege.h"
+#include "global.h"
 
 #define DATENBANKFILE   "OurNotes.ond"
 
