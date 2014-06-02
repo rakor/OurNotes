@@ -45,12 +45,14 @@ ProjektPflege::ProjektPflege(QWidget *parent) :
     while (qu.next()){
         bearbeiter->addItem(qu.value(1).toString(), qu.value(0));
     }
-    bearbeiter->setCurrentIndex(-1);
     qu.finish();
 
     connect( okButton,          &QPushButton::clicked,              this, &ProjektPflege::inDatenbankSchreiben);
     connect( abbrechenButton,   &QPushButton::clicked,              this, &ProjektPflege::close);
     connect( projektWaehler,    SIGNAL(currentIndexChanged(int)),   this, SLOT(gewaehltesProjektGeaendert(int)));
+
+    projektWaehler->setCurrentIndex(0);
+    gewaehltesProjektGeaendert(0);
     this->show();
 }
 
@@ -80,13 +82,22 @@ void ProjektPflege::inDatenbankSchreiben()
 
 void ProjektPflege::gewaehltesProjektGeaendert(int)
 {
+    QSqlQuery qu;
     if (projektWaehler->itemData(projektWaehler->currentIndex()).toInt() == -1){
         bearbeiter->setCurrentIndex(-1);
-        aktiv->setChecked(false);
+        aktiv->setChecked(true);
         titel->clear();
         beschreibung->clear();
+        qu.clear();
+        if (!qu.exec("SELECT ID FROM Benutzer WHERE Systemnutzer='"+QString(getenv(USERENVVAR))+"'")) qDebug() << qu.lastError().text();
+        if (qu.next()){
+            bearbeiter->setCurrentIndex(bearbeiter->findData(qu.value(0)));
+        } else {
+            bearbeiter->setCurrentIndex(-1);
+        }
+        qu.finish();
     }
-    QSqlQuery qu;
+
     qu.clear();
     if (!qu.exec("SELECT NAME, Erstellt_von, Aktiv, Beschreibung FROM Themen WHERE ID='"+projektWaehler->itemData(projektWaehler->currentIndex()).toString()+"'"))
         qDebug() << qu.lastError().text();
