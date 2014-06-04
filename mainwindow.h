@@ -23,6 +23,8 @@
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QApplication>
+#include <QSettings>
+#include <QFileDialog>
 #include "projektpflege.h"
 #include "benutzerpflege.h"
 #include "global.h"
@@ -46,12 +48,14 @@ protected:
     QComboBox*      projekte{nullptr};
     QLineEdit*      textfeld{nullptr};
     QPushButton*    okButton{nullptr};
+    QString         datenbankFile;
 
 protected slots:
     void inDatenbankSchreiben();
     void tabelleFuellen();
     void projekteFuellen();
     void benutzerFuellen();
+    bool neueDatenbankOeffnen();
 };
 
 #endif // MAINWINDOW_H

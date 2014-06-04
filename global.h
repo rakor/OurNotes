@@ -1,6 +1,8 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+#define PROGNAME    "OurNotes"
+
 #ifdef Q_OS_WIN
 #define USERENVVAR  "USERNAME"
 #endif

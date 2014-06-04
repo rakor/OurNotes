@@ -3,22 +3,17 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    QFileInfo dbFile(DATENBANKFILE);
-    bool neueDatenbank{false};
-    if (!dbFile.exists()){
-        if (QMessageBox::question(this, "Datenbank nicht vorhanden",
-                                  "Die Datenbank ist nicht vorhanden. Soll eine neue erstellt werden?") == QMessageBox::Yes){
-            neueDatenbank = true;
-        } else {
-            exit(1);
-        }
-    }
-
     datenbank = QSqlDatabase::addDatabase("QSQLITE");
-    datenbank.setDatabaseName(DATENBANKFILE);
-    datenbank.open();
-    if (neueDatenbank) {
-        if (!tabellenErstellen()) QMessageBox::critical(this, "Fehler", "Fehler beim Erzeugen der Datenbanktabellen!");
+    QSettings settings(PROGNAME, PROGNAME);
+    if (settings.contains("Datenbankfile")){
+        datenbankFile = settings.value("Datenbankfile").toString();
+        datenbank.setDatabaseName(datenbankFile);
+        if (!datenbank.open()){
+            QMessageBox::critical(this, "Fehler", "Datenbank konnte nicht geöffnet werden.");
+            exit(2);
+        }
+    } else {
+        neueDatenbankOeffnen();
     }
 
     guiBauen();
@@ -36,8 +31,11 @@ void MainWindow::guiBauen()
     // MainMenu
     QAction* benutzerverwaltung     = new QAction("Benutzer", this);
     QAction* projektverwaltung      = new QAction("Projekte", this);
+    QAction* datenbankWechseln      = new QAction("Datenbank wechseln", this);
 
     QMenuBar* menu = this->menuBar();
+    QMenu* filemen = menu->addMenu("Datei");
+    filemen->addAction(datenbankWechseln);
     QMenu* sub = menu->addMenu("Pflege");
     sub->addAction(benutzerverwaltung);
     sub->addAction(projektverwaltung);
@@ -46,6 +44,7 @@ void MainWindow::guiBauen()
                                                             connect(b, &BenutzerPflege::aenderungen, this, &MainWindow::benutzerFuellen);});
     connect(projektverwaltung,  &QAction::triggered, [this]{ProjektPflege* p = new ProjektPflege(this);
                                                             connect(p, &ProjektPflege::aenderungen, this, &MainWindow::projekteFuellen);});
+    connect(datenbankWechseln,  &QAction::triggered, this, &MainWindow::neueDatenbankOeffnen);
 
 
     QFrame* frame = new QFrame(this);
@@ -123,6 +122,39 @@ bool MainWindow::tabellenErstellen()
                                     " Text              TEXT)");
     qu.finish();
     return allesOK;
+}
+
+bool MainWindow::neueDatenbankOeffnen()
+{
+    QSettings settings(PROGNAME, PROGNAME);
+        datenbankFile = QFileDialog::getSaveFileName(this, "Datenbankfile",qApp->applicationDirPath() + "/" PROGNAME ".ond", "Datenbank (*.ond)", 0, QFileDialog::DontConfirmOverwrite);
+    if (datenbankFile.isEmpty()) return false;
+    settings.setValue("Datenbankfile", datenbankFile);
+
+    bool neueDatenbank{false};
+    if (!QFileInfo(datenbankFile).exists()){
+        if (QMessageBox::question(this, "Datenbank nicht vorhanden",
+                                  "Die Datenbank ist nicht vorhanden. Soll eine neue erstellt werden?") == QMessageBox::Yes){
+            neueDatenbank = true;
+        } else {
+            return false;
+        }
+    }
+    if (datenbank.isOpen()) datenbank.close();
+    datenbank.setDatabaseName(datenbankFile);
+    if (!datenbank.open()){
+        QMessageBox::critical(this, "Fehler", "Datenbank konnte nicht geöffnet werden.");
+        return false;
+    }
+    if (neueDatenbank) {
+        if (!tabellenErstellen()) QMessageBox::critical(this, "Fehler", "Fehler beim Erzeugen der Datenbanktabellen!");
+    }
+    if (tabelle != nullptr && projekte != nullptr && bearbeiter != nullptr){
+        tabelleFuellen();
+        projekteFuellen();
+        benutzerFuellen();
+    }
+    return true;
 }
 
 void MainWindow::inDatenbankSchreiben()
