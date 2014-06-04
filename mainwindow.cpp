@@ -121,6 +121,22 @@ bool MainWindow::tabellenErstellen()
                                     " Thema             INTEGER,"
                                     " Text              TEXT)");
     qu.finish();
+
+    qu.clear();
+    allesOK = allesOK && qu.exec("CREATE TABLE Status (    ID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                    " Schluessel        TEXT,"
+                                    " Wert              TEXT)");
+    qu.finish();
+
+    qu.clear();
+    allesOK = allesOK && qu.exec("INSERT INTO Status ("
+                                    " Schluessel, Wert"
+                                    ") VALUES ("
+                                    "'Datenbankschema', "
+                                    "'" DATENBANKVERSION "'"
+                                    ")");
+    qu.finish();
+
     return allesOK;
 }
 
