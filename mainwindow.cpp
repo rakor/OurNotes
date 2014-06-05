@@ -19,6 +19,9 @@ MainWindow::MainWindow(QWidget *parent)
     guiBauen();
     this->resize(800,500);
     textfeld->setFocus();
+
+    this->show();
+    tabelle->resizeRowsToContents();
 }
 
 MainWindow::~MainWindow()
@@ -31,6 +34,12 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
             refresh();
         }
     QMainWindow::keyPressEvent(e);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *e)
+{
+    tabelleFuellen();
+    QMainWindow::resizeEvent(e);
 }
 
 void MainWindow::refresh()
@@ -53,6 +62,16 @@ void MainWindow::comboboxesAufSystemuserAnpassen()
         projekte->setCurrentIndex(projekte->findData(qu.value(1)));
     }
     qu.finish();
+}
+
+QTableWidgetItem *MainWindow::neuesTableItem(QString text, bool tooltip, QString tooltiptext)
+{
+    QTableWidgetItem* item{nullptr};
+    item = new QTableWidgetItem(text);
+    item->setTextAlignment(Qt::AlignTop|Qt::AlignLeft);
+    item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+    if (tooltip) item->setToolTip(tooltiptext.isEmpty() ? text : tooltiptext);
+    return item;
 }
 
 void MainWindow::guiBauen()
@@ -229,15 +248,14 @@ void MainWindow::tabelleFuellen()
     int i{0};
     while (qu.next()){
         tabelle->setRowCount(tabelle->rowCount()+1);
-        tabelle->setItem( i,   0, new QTableWidgetItem(qu.value(3).toString()));
-        tabelle->setItem( i,   1, new QTableWidgetItem(qu.value(2).toString()));
-        tabelle->item( i,1 )->setToolTip(qu.value(4).toString());
-        tabelle->setItem( i,   2, new QTableWidgetItem(qu.value(0).toString()));
-        tabelle->item( i,2 )->setToolTip(qu.value(0).toString());
-        tabelle->setItem( i++, 3, new QTableWidgetItem(qu.value(1).toString()));
+        tabelle->setItem( i,   0, neuesTableItem(qu.value(3).toString()));
+        tabelle->setItem( i,   1, neuesTableItem(qu.value(2).toString(), true, qu.value(4).toString()));
+        tabelle->setItem( i,   2, neuesTableItem(qu.value(0).toString()));
+        tabelle->setItem( i++, 3, neuesTableItem(qu.value(1).toString()));
     }
     qu.finish();
     tabelle->scrollToBottom();
+    tabelle->resizeRowsToContents();
 }
 
 void MainWindow::projekteFuellen()

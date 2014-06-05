@@ -9,7 +9,6 @@ int main(int argc, char *argv[])
     a.setApplicationDisplayName(PROGNAME);
     a.setApplicationVersion(PROGVERSION);
     MainWindow w;
-    w.show();
 
     return a.exec();
 }

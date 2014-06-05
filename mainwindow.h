@@ -42,17 +42,19 @@ public:
     void guiBauen();
 
 protected:
-    QSqlDatabase    datenbank;
-    bool tabellenErstellen();
-    QTableWidget*   tabelle{nullptr};
-    QComboBox*      bearbeiter{nullptr};
-    QComboBox*      projekte{nullptr};
-    QLineEdit*      textfeld{nullptr};
-    QPushButton*    okButton{nullptr};
-    QString         datenbankFile;
-    void            keyPressEvent(QKeyEvent *e);
-    void            refresh();
-    void            comboboxesAufSystemuserAnpassen();
+    QSqlDatabase        datenbank;
+    bool                tabellenErstellen();
+    QTableWidget*       tabelle{nullptr};
+    QComboBox*          bearbeiter{nullptr};
+    QComboBox*          projekte{nullptr};
+    QLineEdit*          textfeld{nullptr};
+    QPushButton*        okButton{nullptr};
+    QString             datenbankFile;
+    void                keyPressEvent(QKeyEvent *e);
+    void                resizeEvent(QResizeEvent* e);
+    void                refresh();
+    void                comboboxesAufSystemuserAnpassen();
+    QTableWidgetItem*   neuesTableItem(QString text, bool tooltip=false, QString tooltiptext=QString());
 
 protected slots:
     void inDatenbankSchreiben();
