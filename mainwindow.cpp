@@ -101,6 +101,7 @@ void MainWindow::guiBauen()
     tabelle->setHorizontalHeaderLabels(QStringList() << "Datum" << "Projekt" << "Text" << "Benutzer");
     tabelle->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     tabelle->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    tabelle->setWordWrap(true);
     tabelleFuellen();
 
     // Projekte Fuellen
@@ -232,6 +233,7 @@ void MainWindow::tabelleFuellen()
         tabelle->setItem( i,   1, new QTableWidgetItem(qu.value(2).toString()));
         tabelle->item( i,1 )->setToolTip(qu.value(4).toString());
         tabelle->setItem( i,   2, new QTableWidgetItem(qu.value(0).toString()));
+        tabelle->item( i,2 )->setToolTip(qu.value(0).toString());
         tabelle->setItem( i++, 3, new QTableWidgetItem(qu.value(1).toString()));
     }
     qu.finish();
