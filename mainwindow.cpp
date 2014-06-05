@@ -33,6 +33,8 @@ void MainWindow::guiBauen()
     QAction* projektverwaltung      = new QAction("Projekte", this);
     QAction* datenbankWechseln      = new QAction("Datenbank wechseln", this);
 
+    this->setWindowIcon(QIcon(":/Bilder/Bilder/OurNotes.png"));
+
     QMenuBar* menu = this->menuBar();
     QMenu* filemen = menu->addMenu("Datei");
     filemen->addAction(datenbankWechseln);

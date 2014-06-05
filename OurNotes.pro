@@ -25,4 +25,10 @@ HEADERS  += mainwindow.h \
     global.h
 
 OTHER_FILES += \
-    README
+    README \
+    OurNotes.rc
+
+RC_FILE = OurNotes.rc
+
+RESOURCES += \
+    Ressources.qrc

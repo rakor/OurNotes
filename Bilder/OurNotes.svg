@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   inkscape:export-filename="/home/rakor/Narf.png"
+   inkscape:export-xdpi="15.648366"
+   inkscape:export-ydpi="15.648366"
+   sodipodi:docname="Narf.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="350"
+     inkscape:cy="520"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1280"
+     inkscape:window-height="740"
+     inkscape:window-x="-2"
+     inkscape:window-y="-3"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:#cccccc;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 255.71428,318.07647 c -56.29348,30.3378 -101.42855,345.71429 -101.42856,345.71428 69.76016,-21.9117 133.47632,33.42914 209.99999,38.57144 14.47815,-241.96476 36.67684,-320.43638 87.14286,-334.28572 -228.21242,-42.43602 -149.23799,-49.89243 -195.71429,-50 z"
+       id="path2985"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:#000000;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 280,605.21932 508.57143,392.36218 520,409.50504 297.14286,620.93361 l -35.71428,20 z"
+       id="path2987"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-size:35.11223602px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="353.61566"
+       y="183.70851"
+       id="text2993"
+       sodipodi:linespacing="125%"
+       transform="matrix(0.76021126,0.49519231,-0.20167362,1.1840561,0,0)"><tspan
+         sodipodi:role="line"
+         x="353.61566"
+         y="183.70851"
+         id="tspan2997">Das ist das</tspan><tspan
+         sodipodi:role="line"
+         x="353.61566"
+         y="227.5988"
+         id="tspan3001">Haus vom</tspan><tspan
+         sodipodi:role="line"
+         x="353.61566"
+         y="271.48911"
+         id="tspan3003">Nikolaus</tspan><tspan
+         sodipodi:role="line"
+         x="353.61566"
+         y="315.37939"
+         id="tspan3005" /><tspan
+         sodipodi:role="line"
+         x="353.61566"
+         y="359.26968"
+         id="tspan3007">Narf</tspan></text>
+  </g>
+</svg>
