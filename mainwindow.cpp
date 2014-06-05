@@ -26,6 +26,35 @@ MainWindow::~MainWindow()
     datenbank.close();
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *e){
+    if (e->key() == Qt::Key_F5){
+            refresh();
+        }
+    QMainWindow::keyPressEvent(e);
+}
+
+void MainWindow::refresh()
+{
+    tabelleFuellen();
+    projekteFuellen();
+    benutzerFuellen();
+    comboboxesAufSystemuserAnpassen();
+}
+
+void MainWindow::comboboxesAufSystemuserAnpassen()
+{
+    QString username = QString(getenv(USERENVVAR));
+    QSqlQuery qu;
+    qu.clear();
+    if (!qu.exec("SELECT ID, Letztes_Thema FROM Benutzer WHERE Systemnutzer='"+username+"'"))
+        qDebug() << qu.lastError().text();
+    if (qu.next()){
+        bearbeiter->setCurrentIndex(bearbeiter->findData(qu.value(0)));
+        projekte->setCurrentIndex(projekte->findData(qu.value(1)));
+    }
+    qu.finish();
+}
+
 void MainWindow::guiBauen()
 {
     // MainMenu
@@ -81,16 +110,7 @@ void MainWindow::guiBauen()
     // Benutzer Fuellen
     benutzerFuellen();
 
-    QString username = QString(getenv(USERENVVAR));
-    QSqlQuery qu;
-    qu.clear();
-    if (!qu.exec("SELECT ID, Letztes_Thema FROM Benutzer WHERE Systemnutzer='"+username+"'"))
-        qDebug() << qu.lastError().text();
-    if (qu.next()){
-        bearbeiter->setCurrentIndex(bearbeiter->findData(qu.value(0)));
-        projekte->setCurrentIndex(projekte->findData(qu.value(1)));
-    }
-    qu.finish();
+    comboboxesAufSystemuserAnpassen();
 
     connect(okButton,  &QPushButton::clicked,      this, &MainWindow::inDatenbankSchreiben);
     connect(textfeld,  &QLineEdit::returnPressed,  this, &MainWindow::inDatenbankSchreiben);
@@ -168,9 +188,7 @@ bool MainWindow::neueDatenbankOeffnen()
         if (!tabellenErstellen()) QMessageBox::critical(this, "Fehler", "Fehler beim Erzeugen der Datenbanktabellen!");
     }
     if (tabelle != nullptr && projekte != nullptr && bearbeiter != nullptr){
-        tabelleFuellen();
-        projekteFuellen();
-        benutzerFuellen();
+        refresh();
     }
     return true;
 }

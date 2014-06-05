@@ -25,6 +25,7 @@
 #include <QApplication>
 #include <QSettings>
 #include <QFileDialog>
+#include <QKeyEvent>
 #include "projektpflege.h"
 #include "benutzerpflege.h"
 #include "global.h"
@@ -49,6 +50,9 @@ protected:
     QLineEdit*      textfeld{nullptr};
     QPushButton*    okButton{nullptr};
     QString         datenbankFile;
+    void            keyPressEvent(QKeyEvent *e);
+    void            refresh();
+    void            comboboxesAufSystemuserAnpassen();
 
 protected slots:
     void inDatenbankSchreiben();
