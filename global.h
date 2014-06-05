@@ -2,7 +2,7 @@
 #define GLOBAL_H
 
 #define PROGNAME            "OurNotes"
-#define PROGVERSION         "0.0.1"
+#define PROGVERSION         "0.0.2a"
 #define DATENBANKVERSION    "1"
 
 
