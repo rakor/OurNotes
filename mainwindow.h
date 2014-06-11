@@ -26,6 +26,7 @@
 #include <QSettings>
 #include <QFileDialog>
 #include <QKeyEvent>
+#include <QToolBar>
 #include "projektpflege.h"
 #include "benutzerpflege.h"
 #include "global.h"
@@ -55,13 +56,18 @@ protected:
     void                refresh();
     void                comboboxesAufSystemuserAnpassen();
     QTableWidgetItem*   neuesTableItem(QString text, bool tooltip=false, QString tooltiptext=QString());
+    QAction*            zuDB1Wechseln{nullptr};
+    QAction*            zuDB2Wechseln{nullptr};
+
 
 protected slots:
     void inDatenbankSchreiben();
     void tabelleFuellen();
     void projekteFuellen();
     void benutzerFuellen();
-    bool neueDatenbankOeffnen();
+    bool neueDatenbankdateiSetzen(int);
+    bool datenbankOeffnen(int, bool=false);
+    bool inDatenbankWechseln(int);
 };
 
 #endif // MAINWINDOW_H
