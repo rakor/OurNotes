@@ -239,7 +239,7 @@ bool MainWindow::datenbankOeffnen(int dbNummer, bool initial)
         return false;
     }
     QString datenbankFile = settings.value(settingsWert).toString();
-    if (!initial && !QFileInfo::exists(datenbankFile)) return false;
+    if (!initial && !QFile::exists(datenbankFile)) return false;
     datenbank.setDatabaseName(datenbankFile);
     if (datenbank.open()){
         return true;
@@ -311,8 +311,8 @@ void MainWindow::tabelleFuellen()
         tabelle->setItem( i++, 3, neuesTableItem(qu.value(1).toString()));
     }
     qu.finish();
-    tabelle->scrollToBottom();
     tabelle->resizeRowsToContents();
+    tabelle->scrollToBottom();
 }
 
 void MainWindow::projekteFuellen()
