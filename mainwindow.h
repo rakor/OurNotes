@@ -58,6 +58,7 @@ protected:
     QTableWidgetItem*   neuesTableItem(QString text, bool tooltip=false, QString tooltiptext=QString());
     QAction*            zuDB1Wechseln{nullptr};
     QAction*            zuDB2Wechseln{nullptr};
+    int                 aktuelleDatenbank{0};
 
 
 protected slots:

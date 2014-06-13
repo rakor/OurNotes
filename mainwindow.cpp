@@ -5,13 +5,15 @@ MainWindow::MainWindow(QWidget *parent)
 {
     datenbank = QSqlDatabase::addDatabase("QSQLITE");
 
-    if (!datenbankOeffnen(1)) {
-        do {
-            if (!neueDatenbankdateiSetzen(1)){
-                QMessageBox::critical(this, "Fehler", "Datenbank konnte nicht geöffnet werden.");
-                exit(0);
-            }
-        }while (!datenbankOeffnen(1));
+    if (!datenbankOeffnen(1)){
+        if(!datenbankOeffnen(2)){
+            do {
+                if (!neueDatenbankdateiSetzen(1)){
+                    QMessageBox::critical(this, "Fehler", "Datenbank konnte nicht geöffnet werden.");
+                    exit(0);
+                }
+            }while (!datenbankOeffnen(1));
+        }
     }
 
     guiBauen();
@@ -114,9 +116,9 @@ void MainWindow::guiBauen()
     this->addToolBar(toolbar);
     connect(zuDB1Wechseln, &QAction::triggered, [this]{inDatenbankWechseln(1);});
     connect(zuDB2Wechseln, &QAction::triggered, [this]{inDatenbankWechseln(2);});
-    zuDB1Wechseln->setEnabled(false);
+    zuDB1Wechseln->setEnabled(aktuelleDatenbank == 1 ? false : true);
     QSettings settings(PROGNAME, PROGNAME);
-    if (!settings.contains("Datenbank2")){
+    if (!settings.contains("Datenbank2") || aktuelleDatenbank == 2){
         zuDB2Wechseln->setEnabled(false);
     }
 
@@ -233,6 +235,7 @@ bool MainWindow::neueDatenbankdateiSetzen(int dbNummer)
 
 bool MainWindow::datenbankOeffnen(int dbNummer, bool initial)
 {
+    aktuelleDatenbank = dbNummer;
     QSettings settings(PROGNAME, PROGNAME);
     QString settingsWert = QString("Datenbank")+QString::number(dbNummer);
     if (!settings.contains(settingsWert)) {
