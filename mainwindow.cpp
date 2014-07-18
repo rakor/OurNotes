@@ -64,13 +64,14 @@ void MainWindow::comboboxesAufSystemuserAnpassen()
     qu.finish();
 }
 
-QTableWidgetItem *MainWindow::neuesTableItem(QString text, bool tooltip, QString tooltiptext)
+QTableWidgetItem *MainWindow::neuesTableItem(QString text, bool tooltip, QString tooltiptext, int id)
 {
     QTableWidgetItem* item{nullptr};
     item = new QTableWidgetItem(text);
     item->setTextAlignment(Qt::AlignTop|Qt::AlignLeft);
     item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     if (tooltip) item->setToolTip(tooltiptext.isEmpty() ? text : tooltiptext);
+    if (id != 0) item->setData(Qt::UserRole, id);
     return item;
 }
 
@@ -150,6 +151,9 @@ void MainWindow::guiBauen()
     tabelle->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     tabelle->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     tabelle->setWordWrap(true);
+    tabelle->setContextMenuPolicy(Qt::ActionsContextMenu);
+    QAction* eintragBearbeiten = new QAction("Eintrag bearbeiten", this);
+    tabelle->addAction(eintragBearbeiten);
     tabelleFuellen();
 
     // Projekte Fuellen
@@ -161,8 +165,9 @@ void MainWindow::guiBauen()
 
     comboboxesAufSystemuserAnpassen();
 
-    connect(okButton,  &QPushButton::clicked,      this, &MainWindow::inDatenbankSchreiben);
-    connect(textfeld,  &QLineEdit::returnPressed,  this, &MainWindow::inDatenbankSchreiben);
+    connect(okButton,           &QPushButton::clicked,      this, &MainWindow::inDatenbankSchreiben);
+    connect(textfeld,           &QLineEdit::returnPressed,  this, &MainWindow::inDatenbankSchreiben);
+    connect(eintragBearbeiten,  &QAction::triggered,        this, &MainWindow::eintragBearbeitenSlot);
 }
 
 bool MainWindow::tabellenErstellen()
@@ -273,17 +278,49 @@ bool MainWindow::inDatenbankWechseln(int dbNummer)
     return ergebnis;
 }
 
+void MainWindow::eintragBearbeitenSlot()
+{
+    QSqlQuery qu;
+    qu.clear();
+    if (!qu.exec("SELECT Eintraege.Text, Benutzer.Name, Themen.Name, Eintraege.Eingetragen_am, Themen.Beschreibung, Eintraege.ID FROM Eintraege"
+                 " JOIN Benutzer on Eingetragen_von=Benutzer.ID "
+                 " JOIN Themen on Thema=Themen.ID "
+                 " WHERE Eintraege.ID='"+tabelle->currentItem()->data(Qt::UserRole).toString()+"' "
+                 " ORDER BY Eingetragen_am ASC ")) qDebug() << qu.lastError().text();
+
+    if (qu.next()){
+        textfeld->setText(qu.value(0).toString());
+        bearbeiter->setCurrentIndex(bearbeiter->findText(qu.value(1).toString()));
+        projekte->setCurrentIndex(projekte->findText(qu.value(2).toString()));
+        zuAendernderDatensatzID=qu.value(5).toInt();
+        QPalette mypalette = this->palette();
+        mypalette.setColor(QPalette::Text, Qt::red);
+        textfeld->setPalette(mypalette);
+        textfeld->setFocus();
+    }
+}
+
 void MainWindow::inDatenbankSchreiben()
 {
     if (projekte->currentIndex() < 0 || textfeld->text().isEmpty() || bearbeiter->currentIndex() < 0) return;
     QSqlQuery qu;
     qu.clear();
-    if (!qu.exec("INSERT INTO Eintraege (Eingetragen_von, Eingetragen_am, Thema, Text) VALUES ("
-            "'"+bearbeiter->itemData(bearbeiter->currentIndex()).toString()+"', "
-            "'"+QDate::currentDate().toString("yyyyMMdd")+"', "
-            "'"+projekte->itemData(projekte->currentIndex()).toString()+"', "
-            "'"+textfeld->text().replace('\'',"\'\'")+"'"
-            ")")) qDebug() << qu.lastError().text();
+    if (zuAendernderDatensatzID == 0){
+        if (!qu.exec("INSERT INTO Eintraege (Eingetragen_von, Eingetragen_am, Thema, Text) VALUES ("
+                "'"+bearbeiter->itemData(bearbeiter->currentIndex()).toString()+"', "
+                "'"+QDate::currentDate().toString("yyyyMMdd")+"', "
+                "'"+projekte->itemData(projekte->currentIndex()).toString()+"', "
+                "'"+textfeld->text().replace('\'',"\'\'")+"'"
+                ")")) qDebug() << qu.lastError().text();
+    } else {
+        if (!qu.exec("UPDATE Eintraege SET Eingetragen_von='"+bearbeiter->itemData(bearbeiter->currentIndex()).toString()+"', "
+                     "Thema='"+projekte->itemData(projekte->currentIndex()).toString()+"', "
+                     "Text='"+textfeld->text().replace('\'',"\'\'")+"' "
+                     " WHERE Eintraege.ID='"+QString::number(zuAendernderDatensatzID)+"'"
+                )) qDebug() << qu.lastError().text();
+        textfeld->setPalette(this->palette());
+
+    }
     qu.finish();
     qu.clear();
     if (!qu.exec("UPDATE Benutzer SET Letztes_Thema='"+projekte->itemData(projekte->currentIndex()).toString()+
@@ -293,6 +330,7 @@ void MainWindow::inDatenbankSchreiben()
     qu.finish();
     textfeld->clear();
     tabelleFuellen();
+    zuAendernderDatensatzID = 0;
 }
 
 void MainWindow::tabelleFuellen()
@@ -302,15 +340,15 @@ void MainWindow::tabelleFuellen()
     }
     QSqlQuery qu;
     qu.clear();
-    if (!qu.exec("SELECT Eintraege.Text, Benutzer.Name, Themen.Name, Eintraege.Eingetragen_am, Themen.Beschreibung FROM Eintraege"
+    if (!qu.exec("SELECT Eintraege.Text, Benutzer.Name, Themen.Name, Eintraege.Eingetragen_am, Themen.Beschreibung, Eintraege.ID FROM Eintraege"
                  " JOIN Benutzer on Eingetragen_von=Benutzer.ID "
                  " JOIN Themen on Thema=Themen.ID ORDER BY Eingetragen_am ASC")) qDebug() << qu.lastError().text();
     int i{0};
     while (qu.next()){
         tabelle->setRowCount(tabelle->rowCount()+1);
         tabelle->setItem( i,   0, neuesTableItem(qu.value(3).toString()));
-        tabelle->setItem( i,   1, neuesTableItem(qu.value(2).toString(), true, qu.value(4).toString()));
-        tabelle->setItem( i,   2, neuesTableItem(qu.value(0).toString()));
+        tabelle->setItem( i,   1, neuesTableItem(qu.value(2).toString(), true, qu.value(4).toString(), qu.value(5).toInt()));
+        tabelle->setItem( i,   2, neuesTableItem(qu.value(0).toString(), false, QString(), qu.value(5).toInt()));
         tabelle->setItem( i++, 3, neuesTableItem(qu.value(1).toString()));
     }
     qu.finish();

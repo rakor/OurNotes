@@ -55,10 +55,11 @@ protected:
     void                resizeEvent(QResizeEvent* e);
     void                refresh();
     void                comboboxesAufSystemuserAnpassen();
-    QTableWidgetItem*   neuesTableItem(QString text, bool tooltip=false, QString tooltiptext=QString());
+    QTableWidgetItem*   neuesTableItem(QString text, bool tooltip=false, QString tooltiptext=QString(), int id=0);
     QAction*            zuDB1Wechseln{nullptr};
     QAction*            zuDB2Wechseln{nullptr};
     int                 aktuelleDatenbank{0};
+    int                 zuAendernderDatensatzID{0};
 
 
 protected slots:
@@ -69,6 +70,7 @@ protected slots:
     bool neueDatenbankdateiSetzen(int);
     bool datenbankOeffnen(int, bool=false);
     bool inDatenbankWechseln(int);
+    void eintragBearbeitenSlot();
 };
 
 #endif // MAINWINDOW_H
