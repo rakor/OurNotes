@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -64,7 +65,7 @@ void MainWindow::comboboxesAufSystemuserAnpassen()
     qu.finish();
 }
 
-QTableWidgetItem *MainWindow::neuesTableItem(QString text, bool tooltip, QString tooltiptext, int id)
+QTableWidgetItem *MainWindow::neuesTableItem(QString text, int id, bool tooltip, QString tooltiptext)
 {
     QTableWidgetItem* item{nullptr};
     item = new QTableWidgetItem(text);
@@ -152,8 +153,8 @@ void MainWindow::guiBauen()
     tabelle->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     tabelle->setWordWrap(true);
     tabelle->setContextMenuPolicy(Qt::ActionsContextMenu);
-    QAction* eintragBearbeiten = new QAction("Eintrag bearbeiten", this);
-    tabelle->addAction(eintragBearbeiten);
+    eintragBearbeitenAction = new QAction("Eintrag bearbeiten", this);
+    tabelle->addAction(eintragBearbeitenAction);
     tabelleFuellen();
 
     // Projekte Fuellen
@@ -165,9 +166,9 @@ void MainWindow::guiBauen()
 
     comboboxesAufSystemuserAnpassen();
 
-    connect(okButton,           &QPushButton::clicked,      this, &MainWindow::inDatenbankSchreiben);
-    connect(textfeld,           &QLineEdit::returnPressed,  this, &MainWindow::inDatenbankSchreiben);
-    connect(eintragBearbeiten,  &QAction::triggered,        this, &MainWindow::eintragBearbeitenSlot);
+    connect(okButton,               &QPushButton::clicked,      this, &MainWindow::inDatenbankSchreiben);
+    connect(textfeld,               &QLineEdit::returnPressed,  this, &MainWindow::inDatenbankSchreiben);
+    connect(eintragBearbeitenAction,&QAction::triggered,        this, &MainWindow::eintragBearbeitenSlot);
 }
 
 bool MainWindow::tabellenErstellen()
@@ -346,10 +347,11 @@ void MainWindow::tabelleFuellen()
     int i{0};
     while (qu.next()){
         tabelle->setRowCount(tabelle->rowCount()+1);
-        tabelle->setItem( i,   0, neuesTableItem(qu.value(3).toString()));
-        tabelle->setItem( i,   1, neuesTableItem(qu.value(2).toString(), true, qu.value(4).toString(), qu.value(5).toInt()));
-        tabelle->setItem( i,   2, neuesTableItem(qu.value(0).toString(), false, QString(), qu.value(5).toInt()));
-        tabelle->setItem( i++, 3, neuesTableItem(qu.value(1).toString()));
+        int id = qu.value(5).toInt();
+        tabelle->setItem( i,   0, neuesTableItem(qu.value(3).toString(), id));
+        tabelle->setItem( i,   1, neuesTableItem(qu.value(2).toString(), id, true, qu.value(4).toString()));
+        tabelle->setItem( i,   2, neuesTableItem(qu.value(0).toString(), id, false, QString()));
+        tabelle->setItem( i++, 3, neuesTableItem(qu.value(1).toString(), id));
     }
     qu.finish();
     tabelle->resizeRowsToContents();

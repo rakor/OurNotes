@@ -55,11 +55,12 @@ protected:
     void                resizeEvent(QResizeEvent* e);
     void                refresh();
     void                comboboxesAufSystemuserAnpassen();
-    QTableWidgetItem*   neuesTableItem(QString text, bool tooltip=false, QString tooltiptext=QString(), int id=0);
+    QTableWidgetItem*   neuesTableItem(QString text, int id=0, bool tooltip=false, QString tooltiptext=QString());
     QAction*            zuDB1Wechseln{nullptr};
     QAction*            zuDB2Wechseln{nullptr};
     int                 aktuelleDatenbank{0};
     int                 zuAendernderDatensatzID{0};
+    QAction*            eintragBearbeitenAction{nullptr};
 
 
 protected slots:
