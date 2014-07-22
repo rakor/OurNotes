@@ -34,6 +34,10 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
     if (e->key() == Qt::Key_F5){
             refresh();
         }
+    if (e->key() == Qt::Key_Escape){
+            suchfeld->clear();
+            textfeld->clear();
+    }
     QMainWindow::keyPressEvent(e);
 }
 
@@ -124,13 +128,28 @@ void MainWindow::guiBauen()
         zuDB2Wechseln->setEnabled(false);
     }
 
+    // Generierung des Fensterinhalts
     QFrame* frame = new QFrame(this);
     this->setCentralWidget(frame);
     QVBoxLayout* vbox = new QVBoxLayout(frame);
     QHBoxLayout* hbox = new QHBoxLayout(frame);
     frame->setLayout(vbox);
 
+    // Suchleiste
+    vbox->addLayout(hbox);
+    hbox->addWidget(new QLabel("Suche", this));
+    suchfeld = new QLineEdit(this);
+    hbox->addWidget(suchfeld);
+    suchresetButton     = new QPushButton("zurücksetzen", this);
+    suchauswahlProjekt  = new QCheckBox("Projekt", this);
+    suchauswahlProjekt->setChecked(true);
+    suchauswahlText     = new QCheckBox("Text", this);
+    suchauswahlText->setChecked(true);
+    hbox->addWidget(suchresetButton);
+    hbox->addWidget(suchauswahlProjekt);
+    hbox->addWidget(suchauswahlText);
 
+    // Rest ;)
     tabelle     = new QTableWidget(this);
     bearbeiter  = new QComboBox(this);
     projekte    = new QComboBox(this);
@@ -140,6 +159,7 @@ void MainWindow::guiBauen()
     projekte->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     bearbeiter->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
+    hbox = new QHBoxLayout(frame);
     vbox->addWidget(tabelle);
     vbox->addLayout(hbox);
     hbox->addWidget(projekte);
@@ -152,6 +172,7 @@ void MainWindow::guiBauen()
     tabelle->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     tabelle->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     tabelle->setWordWrap(true);
+
     // Kontextmenu
     tabelle->setContextMenuPolicy(Qt::ActionsContextMenu);
     eintragBearbeitenAction = new QAction("Eintrag bearbeiten", this);
@@ -170,10 +191,14 @@ void MainWindow::guiBauen()
 
     comboboxesAufSystemuserAnpassen();
 
-    connect(okButton,               &QPushButton::clicked,      this, &MainWindow::inDatenbankSchreiben);
-    connect(textfeld,               &QLineEdit::returnPressed,  this, &MainWindow::inDatenbankSchreiben);
-    connect(eintragBearbeitenAction,&QAction::triggered,        this, &MainWindow::eintragBearbeitenSlot);
-    connect(eintragLoeschenAction,  &QAction::triggered,        this, &MainWindow::eintragLoeschenSlot);
+    connect(okButton,               &QPushButton::clicked,      this,       &MainWindow::inDatenbankSchreiben);
+    connect(textfeld,               &QLineEdit::returnPressed,  this,       &MainWindow::inDatenbankSchreiben);
+    connect(eintragBearbeitenAction,&QAction::triggered,        this,       &MainWindow::eintragBearbeitenSlot);
+    connect(eintragLoeschenAction,  &QAction::triggered,        this,       &MainWindow::eintragLoeschenSlot);
+    connect(suchfeld,               &QLineEdit::textChanged,    this,       &MainWindow::tabelleFuellen);
+    connect(suchresetButton,        &QPushButton::clicked,      suchfeld,   &QLineEdit::clear);
+    connect(suchauswahlProjekt,     &QCheckBox::toggled,        this,       &MainWindow::tabelleFuellen);
+    connect(suchauswahlText,        &QCheckBox::toggled,        this,       &MainWindow::tabelleFuellen);
 }
 
 bool MainWindow::tabellenErstellen()
@@ -316,6 +341,7 @@ void MainWindow::eintragLoeschenSlot()
     refresh();
 }
 
+
 void MainWindow::inDatenbankSchreiben()
 {
     if (projekte->currentIndex() < 0 || textfeld->text().isEmpty() || bearbeiter->currentIndex() < 0) return;
@@ -356,9 +382,19 @@ void MainWindow::tabelleFuellen()
     }
     QSqlQuery qu;
     qu.clear();
-    if (!qu.exec("SELECT Eintraege.Text, Benutzer.Name, Themen.Name, Eintraege.Eingetragen_am, Themen.Beschreibung, Eintraege.ID FROM Eintraege"
-                 " JOIN Benutzer on Eingetragen_von=Benutzer.ID "
-                 " JOIN Themen on Thema=Themen.ID ORDER BY Eingetragen_am ASC")) qDebug() << qu.lastError().text();
+    QString sqlstring = "SELECT Eintraege.Text, Benutzer.Name, Themen.Name, Eintraege.Eingetragen_am, Themen.Beschreibung, Eintraege.ID FROM Eintraege"
+            " JOIN Benutzer on Eingetragen_von=Benutzer.ID "
+            " JOIN Themen on Thema=Themen.ID";
+    if (!suchfeld->text().isEmpty()){
+        if (suchauswahlProjekt->isChecked() || suchauswahlText->isChecked()) sqlstring.append(" WHERE ");
+        if (suchauswahlProjekt->isChecked()) sqlstring.append(" Themen.Name LIKE '%"+suchfeld->text()+"%' OR Themen.Beschreibung LIKE '%"+suchfeld->text()+"%'");
+        if (suchauswahlProjekt->isChecked() && suchauswahlText->isChecked()) sqlstring.append(" OR ");
+        if (suchauswahlText->isChecked()) sqlstring.append(" Eintraege.Text LIKE '%"+suchfeld->text()+"%'");
+    }
+    sqlstring.append(" ORDER BY Eingetragen_am ASC");
+
+    qDebug() << sqlstring;
+    if (!qu.exec(sqlstring)) qDebug() << qu.lastError().text();
     int i{0};
     while (qu.next()){
         tabelle->setRowCount(tabelle->rowCount()+1);

@@ -28,6 +28,7 @@
 #include <QKeyEvent>
 #include <QToolBar>
 #include <QMessageBox>
+#include <QCheckBox>
 #include "projektpflege.h"
 #include "benutzerpflege.h"
 #include "global.h"
@@ -63,6 +64,10 @@ protected:
     int                 zuAendernderDatensatzID{0};
     QAction*            eintragBearbeitenAction{nullptr};
     QAction*            eintragLoeschenAction{nullptr};
+    QCheckBox*          suchauswahlText{nullptr};
+    QCheckBox*          suchauswahlProjekt{nullptr};
+    QPushButton*        suchresetButton{nullptr};
+    QLineEdit*          suchfeld{nullptr};
 
 protected slots:
     void inDatenbankSchreiben();
@@ -74,6 +79,7 @@ protected slots:
     bool inDatenbankWechseln(int);
     void eintragBearbeitenSlot();
     void eintragLoeschenSlot();
+
 };
 
 #endif // MAINWINDOW_H
