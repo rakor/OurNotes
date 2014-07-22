@@ -108,7 +108,7 @@ void MainWindow::guiBauen()
 
 
     // Toolbar bauen
-    QToolBar*   toolbar     = new QToolBar("test", this);
+    QToolBar*   toolbar     = new QToolBar("Datenbankauswahl", this);
     toolbar->setMovable(false);
     toolbar->setFloatable(false);
     zuDB1Wechseln = new QAction("Datenbank 1", this);
@@ -152,9 +152,13 @@ void MainWindow::guiBauen()
     tabelle->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     tabelle->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     tabelle->setWordWrap(true);
+    // Kontextmenu
     tabelle->setContextMenuPolicy(Qt::ActionsContextMenu);
     eintragBearbeitenAction = new QAction("Eintrag bearbeiten", this);
     tabelle->addAction(eintragBearbeitenAction);
+    eintragLoeschenAction = new QAction("Eintrag löschen", this);
+    tabelle->addAction(eintragLoeschenAction);
+
     tabelleFuellen();
 
     // Projekte Fuellen
@@ -169,6 +173,7 @@ void MainWindow::guiBauen()
     connect(okButton,               &QPushButton::clicked,      this, &MainWindow::inDatenbankSchreiben);
     connect(textfeld,               &QLineEdit::returnPressed,  this, &MainWindow::inDatenbankSchreiben);
     connect(eintragBearbeitenAction,&QAction::triggered,        this, &MainWindow::eintragBearbeitenSlot);
+    connect(eintragLoeschenAction,  &QAction::triggered,        this, &MainWindow::eintragLoeschenSlot);
 }
 
 bool MainWindow::tabellenErstellen()
@@ -299,6 +304,16 @@ void MainWindow::eintragBearbeitenSlot()
         textfeld->setPalette(mypalette);
         textfeld->setFocus();
     }
+}
+
+void MainWindow::eintragLoeschenSlot()
+{
+    if (QMessageBox::question(this, "Löschen", "Wollten Sie den Datensatz wirklich löschen.") != QMessageBox::Yes) return;
+    QSqlQuery qu;
+    qu.clear();
+    qu.exec("DELETE FROM Eintraege WHERE ID='"+tabelle->currentItem()->data(Qt::UserRole).toString()+"'");
+    qu.finish();
+    refresh();
 }
 
 void MainWindow::inDatenbankSchreiben()

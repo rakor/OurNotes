@@ -27,6 +27,7 @@
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QToolBar>
+#include <QMessageBox>
 #include "projektpflege.h"
 #include "benutzerpflege.h"
 #include "global.h"
@@ -61,7 +62,7 @@ protected:
     int                 aktuelleDatenbank{0};
     int                 zuAendernderDatensatzID{0};
     QAction*            eintragBearbeitenAction{nullptr};
-
+    QAction*            eintragLoeschenAction{nullptr};
 
 protected slots:
     void inDatenbankSchreiben();
@@ -72,6 +73,7 @@ protected slots:
     bool datenbankOeffnen(int, bool=false);
     bool inDatenbankWechseln(int);
     void eintragBearbeitenSlot();
+    void eintragLoeschenSlot();
 };
 
 #endif // MAINWINDOW_H
