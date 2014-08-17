@@ -29,6 +29,7 @@
 #include <QToolBar>
 #include <QMessageBox>
 #include <QCheckBox>
+#include <QGroupBox>
 #include "projektpflege.h"
 #include "benutzerpflege.h"
 #include "global.h"
@@ -45,6 +46,7 @@ public:
     void guiBauen();
 
 protected:
+    bool                gefilter{false};
     QSqlDatabase        datenbank;
     bool                tabellenErstellen();
     QTableWidget*       tabelle{nullptr};
@@ -68,6 +70,8 @@ protected:
     QCheckBox*          suchauswahlProjekt{nullptr};
     QPushButton*        suchresetButton{nullptr};
     QLineEdit*          suchfeld{nullptr};
+    QComboBox*          themenFilterCombo{nullptr};
+    QComboBox*          personenFilterCombo{nullptr};
 
 protected slots:
     void inDatenbankSchreiben();
@@ -79,6 +83,8 @@ protected slots:
     bool inDatenbankWechseln(int);
     void eintragBearbeitenSlot();
     void eintragLoeschenSlot();
+    void suchresetButtoGeklickt();
+
 
 };
 

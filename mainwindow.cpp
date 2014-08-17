@@ -73,6 +73,7 @@ QTableWidgetItem *MainWindow::neuesTableItem(QString text, int id, bool tooltip,
 {
     QTableWidgetItem* item{nullptr};
     item = new QTableWidgetItem(text);
+    if (gefilter) item->setBackgroundColor(Qt::cyan);
     item->setTextAlignment(Qt::AlignTop|Qt::AlignLeft);
     item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     if (tooltip) item->setToolTip(tooltiptext.isEmpty() ? text : tooltiptext);
@@ -105,7 +106,7 @@ void MainWindow::guiBauen()
     connect(benutzerverwaltung, &QAction::triggered, [this]{BenutzerPflege* b = new BenutzerPflege(this);
                                                             connect(b, &BenutzerPflege::aenderungen, this, &MainWindow::benutzerFuellen);});
     connect(projektverwaltung,  &QAction::triggered, [this]{ProjektPflege* p = new ProjektPflege(this);
-                                                            connect(p, &ProjektPflege::aenderungen, this, &MainWindow::projekteFuellen);});
+                                                           connect(p, &ProjektPflege::aenderungen, this, &MainWindow::projekteFuellen);});
     connect(datenbank1Wechseln,  &QAction::triggered, [this]{neueDatenbankdateiSetzen(1); inDatenbankWechseln(1);});
     connect(datenbank2Wechseln,  &QAction::triggered, [this]{neueDatenbankdateiSetzen(2); inDatenbankWechseln(2);});
     connect(aboutQt, &QAction::triggered, [this]{QMessageBox::aboutQt(this);});
@@ -128,26 +129,47 @@ void MainWindow::guiBauen()
         zuDB2Wechseln->setEnabled(false);
     }
 
+
     // Generierung des Fensterinhalts
     QFrame* frame = new QFrame(this);
     this->setCentralWidget(frame);
-    QVBoxLayout* vbox = new QVBoxLayout(frame);
-    QHBoxLayout* hbox = new QHBoxLayout(frame);
+    QVBoxLayout* vbox   = new QVBoxLayout(frame);
+    QHBoxLayout* hbox   = new QHBoxLayout(frame);
+    QHBoxLayout* gboxes = new QHBoxLayout(frame);
     frame->setLayout(vbox);
+    vbox->addLayout(gboxes);
 
     // Suchleiste
-    vbox->addLayout(hbox);
-    hbox->addWidget(new QLabel("Suche", this));
     suchfeld = new QLineEdit(this);
-    hbox->addWidget(suchfeld);
     suchresetButton     = new QPushButton("zurücksetzen", this);
     suchauswahlProjekt  = new QCheckBox("Projekt", this);
     suchauswahlProjekt->setChecked(true);
     suchauswahlText     = new QCheckBox("Text", this);
     suchauswahlText->setChecked(true);
-    hbox->addWidget(suchresetButton);
-    hbox->addWidget(suchauswahlProjekt);
-    hbox->addWidget(suchauswahlText);
+
+    QGroupBox*      suchenGroup         = new QGroupBox("Suchen", this);
+    QGridLayout*    suchenGrid          = new QGridLayout(suchenGroup);
+    QHBoxLayout*    suchbereicheHBox    = new QHBoxLayout(suchenGroup);
+    gboxes->addWidget(suchenGroup);
+    suchenGroup->setLayout(suchenGrid);
+    suchenGrid->addWidget(new QLabel("Suche:", this),   0, 0);
+    suchenGrid->addWidget(suchfeld, 0, 1);
+    suchenGrid->addWidget(new QLabel("Bereich:", this), 1, 0);
+    suchenGrid->addLayout(suchbereicheHBox,             1, 1);
+    suchbereicheHBox->addWidget(suchauswahlProjekt);
+    suchbereicheHBox->addWidget(suchauswahlText);
+
+    QGroupBox*  filternGroup = new QGroupBox("Filtern", this);
+    QGridLayout* grid = new QGridLayout(filternGroup);
+    filternGroup->setLayout(grid);
+    gboxes->addWidget(filternGroup);
+    themenFilterCombo   = new QComboBox(this);
+    personenFilterCombo = new QComboBox(this);
+    grid->addWidget(new QLabel("Themen:", this), 0, 0);
+    grid->addWidget(themenFilterCombo, 0, 1);
+    grid->addWidget(new QLabel("Personen:", this), 1, 0);
+    grid->addWidget(personenFilterCombo, 1, 1);
+    gboxes->addWidget(suchresetButton);
 
     // Rest ;)
     tabelle     = new QTableWidget(this);
@@ -159,7 +181,6 @@ void MainWindow::guiBauen()
     projekte->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     bearbeiter->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
-    hbox = new QHBoxLayout(frame);
     vbox->addWidget(tabelle);
     vbox->addLayout(hbox);
     hbox->addWidget(projekte);
@@ -196,7 +217,9 @@ void MainWindow::guiBauen()
     connect(eintragBearbeitenAction,&QAction::triggered,        this,       &MainWindow::eintragBearbeitenSlot);
     connect(eintragLoeschenAction,  &QAction::triggered,        this,       &MainWindow::eintragLoeschenSlot);
     connect(suchfeld,               &QLineEdit::textChanged,    this,       &MainWindow::tabelleFuellen);
-    connect(suchresetButton,        &QPushButton::clicked,      suchfeld,   &QLineEdit::clear);
+    connect(suchresetButton,        &QPushButton::clicked,      this,       &MainWindow::suchresetButtoGeklickt);
+    connect(personenFilterCombo,    SIGNAL(currentIndexChanged(int)), this,  SLOT(tabelleFuellen()));
+    connect(themenFilterCombo,      SIGNAL(currentIndexChanged(int)), this,  SLOT(tabelleFuellen()));
     connect(suchauswahlProjekt,     &QCheckBox::toggled,        this,       &MainWindow::tabelleFuellen);
     connect(suchauswahlText,        &QCheckBox::toggled,        this,       &MainWindow::tabelleFuellen);
 }
@@ -341,6 +364,14 @@ void MainWindow::eintragLoeschenSlot()
     refresh();
 }
 
+void MainWindow::suchresetButtoGeklickt()
+{
+    gefilter = false;
+    personenFilterCombo->setCurrentIndex(0);
+    themenFilterCombo->setCurrentIndex(0);
+    suchfeld->clear();
+}
+
 
 void MainWindow::inDatenbankSchreiben()
 {
@@ -386,15 +417,32 @@ void MainWindow::tabelleFuellen()
             " JOIN Benutzer on Eingetragen_von=Benutzer.ID "
             " JOIN Themen on Thema=Themen.ID";
     if (!suchfeld->text().isEmpty()){
+        gefilter = true;
         if (suchauswahlProjekt->isChecked() || suchauswahlText->isChecked()) sqlstring.append(" WHERE ");
         if (suchauswahlProjekt->isChecked()) sqlstring.append(" Themen.Name LIKE '%"+suchfeld->text()+"%' OR Themen.Beschreibung LIKE '%"+suchfeld->text()+"%'");
         if (suchauswahlProjekt->isChecked() && suchauswahlText->isChecked()) sqlstring.append(" OR ");
         if (suchauswahlText->isChecked()) sqlstring.append(" Eintraege.Text LIKE '%"+suchfeld->text()+"%'");
     }
+
+    // Filtern auf die Filtercomboboxes
+    if (themenFilterCombo->currentIndex() > 0 || personenFilterCombo->currentIndex() > 0){
+        gefilter = true;
+        sqlstring.append(" WHERE (");
+        if (themenFilterCombo->currentIndex() > 0){
+            sqlstring.append(" Themen.ID='"+themenFilterCombo->currentData().toString()+"' ");
+        }
+        if (themenFilterCombo->currentIndex() > 0 && personenFilterCombo->currentIndex() > 0){
+            sqlstring.append(" AND ");
+        }
+        if (personenFilterCombo->currentIndex() > 0){
+            sqlstring.append(" Benutzer.ID='"+personenFilterCombo->currentData().toString()+"' ");
+        }
+        sqlstring.append(")");
+    }
+
     sqlstring.append(" ORDER BY Eingetragen_am ASC");
 
-    qDebug() << sqlstring;
-    if (!qu.exec(sqlstring)) qDebug() << qu.lastError().text();
+    if (!qu.exec(sqlstring)) qDebug() << sqlstring << " brachte den Fehler: " << qu.lastError().text();
     int i{0};
     while (qu.next()){
         tabelle->setRowCount(tabelle->rowCount()+1);
@@ -412,11 +460,14 @@ void MainWindow::tabelleFuellen()
 void MainWindow::projekteFuellen()
 {
     projekte->clear();
+    themenFilterCombo->clear();
+    themenFilterCombo->addItem("- Themen -");
     QSqlQuery qu;
     qu.clear();
     qu.exec("SELECT ID, Name FROM Themen WHERE Aktiv='1'");
     while (qu.next()){
         projekte->addItem(qu.value(1).toString(), qu.value(0));
+        themenFilterCombo->addItem(qu.value(1).toString(), qu.value(0));
     }
     qu.finish();
 }
@@ -424,11 +475,14 @@ void MainWindow::projekteFuellen()
 void MainWindow::benutzerFuellen()
 {
     bearbeiter->clear();
+    personenFilterCombo->clear();
+    personenFilterCombo->addItem("- Personen -");
     QSqlQuery qu;
     qu.clear();
     qu.exec("SELECT ID, Name FROM Benutzer");
     while (qu.next()){
         bearbeiter->addItem(qu.value(1).toString(), qu.value(0));
+        personenFilterCombo->addItem(qu.value(1).toString(), qu.value(0));
     }
     qu.finish();
 }
