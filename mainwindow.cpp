@@ -35,8 +35,8 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
             refresh();
         }
     if (e->key() == Qt::Key_Escape){
-            suchfeld->clear();
             textfeld->clear();
+            suchresetButtoGeklickt();
     }
     QMainWindow::keyPressEvent(e);
 }
@@ -367,9 +367,14 @@ void MainWindow::eintragLoeschenSlot()
 void MainWindow::suchresetButtoGeklickt()
 {
     gefilter = false;
+    disconnect(personenFilterCombo,    SIGNAL(currentIndexChanged(int)), this,  SLOT(tabelleFuellen()));
+    disconnect(themenFilterCombo,      SIGNAL(currentIndexChanged(int)), this,  SLOT(tabelleFuellen()));
     personenFilterCombo->setCurrentIndex(0);
     themenFilterCombo->setCurrentIndex(0);
     suchfeld->clear();
+    connect(personenFilterCombo,    SIGNAL(currentIndexChanged(int)), this,  SLOT(tabelleFuellen()));
+    connect(themenFilterCombo,      SIGNAL(currentIndexChanged(int)), this,  SLOT(tabelleFuellen()));
+    tabelleFuellen();
 }
 
 
@@ -408,6 +413,7 @@ void MainWindow::inDatenbankSchreiben()
 
 void MainWindow::tabelleFuellen()
 {
+    gefilter = false;
     for (int j{tabelle->rowCount()-1}; j >= 0; j--){
         tabelle->removeRow(j);
     }
@@ -416,7 +422,7 @@ void MainWindow::tabelleFuellen()
     QString sqlstring = "SELECT Eintraege.Text, Benutzer.Name, Themen.Name, Eintraege.Eingetragen_am, Themen.Beschreibung, Eintraege.ID FROM Eintraege"
             " JOIN Benutzer on Eingetragen_von=Benutzer.ID "
             " JOIN Themen on Thema=Themen.ID";
-    if (!suchfeld->text().isEmpty()){
+    if (!suchfeld->text().isEmpty() && !(!suchauswahlProjekt->isChecked() && !suchauswahlText->isChecked())){
         gefilter = true;
         if (suchauswahlProjekt->isChecked() || suchauswahlText->isChecked()) sqlstring.append(" WHERE ");
         if (suchauswahlProjekt->isChecked()) sqlstring.append(" Themen.Name LIKE '%"+suchfeld->text()+"%' OR Themen.Beschreibung LIKE '%"+suchfeld->text()+"%'");
@@ -426,8 +432,12 @@ void MainWindow::tabelleFuellen()
 
     // Filtern auf die Filtercomboboxes
     if (themenFilterCombo->currentIndex() > 0 || personenFilterCombo->currentIndex() > 0){
-        gefilter = true;
-        sqlstring.append(" WHERE (");
+        if (gefilter){
+            sqlstring.append(" AND (");
+        } else {
+            gefilter = true;
+            sqlstring.append(" WHERE (");
+        }
         if (themenFilterCombo->currentIndex() > 0){
             sqlstring.append(" Themen.ID='"+themenFilterCombo->currentData().toString()+"' ");
         }
