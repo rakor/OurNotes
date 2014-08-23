@@ -424,16 +424,16 @@ void MainWindow::tabelleFuellen()
             " JOIN Themen on Thema=Themen.ID";
     if (!suchfeld->text().isEmpty() && !(!suchauswahlProjekt->isChecked() && !suchauswahlText->isChecked())){
         gefilter = true;
-        if (suchauswahlProjekt->isChecked() || suchauswahlText->isChecked()) sqlstring.append(" WHERE ");
+        if (suchauswahlProjekt->isChecked() || suchauswahlText->isChecked()) sqlstring.append(" WHERE ((");
         if (suchauswahlProjekt->isChecked()) sqlstring.append(" Themen.Name LIKE '%"+suchfeld->text()+"%' OR Themen.Beschreibung LIKE '%"+suchfeld->text()+"%'");
         if (suchauswahlProjekt->isChecked() && suchauswahlText->isChecked()) sqlstring.append(" OR ");
-        if (suchauswahlText->isChecked()) sqlstring.append(" Eintraege.Text LIKE '%"+suchfeld->text()+"%'");
+        if (suchauswahlText->isChecked()) sqlstring.append(" Eintraege.Text LIKE '%"+suchfeld->text()+"%')");
     }
 
     // Filtern auf die Filtercomboboxes
     if (themenFilterCombo->currentIndex() > 0 || personenFilterCombo->currentIndex() > 0){
         if (gefilter){
-            sqlstring.append(" AND (");
+            sqlstring.append(" AND ");
         } else {
             gefilter = true;
             sqlstring.append(" WHERE (");
@@ -446,12 +446,14 @@ void MainWindow::tabelleFuellen()
         }
         if (personenFilterCombo->currentIndex() > 0){
             sqlstring.append(" Benutzer.ID='"+personenFilterCombo->currentData().toString()+"' ");
-        }
-        sqlstring.append(")");
+        }    
     }
+    if (gefilter)
+        sqlstring.append(")");
 
     sqlstring.append(" ORDER BY Eingetragen_am ASC");
 
+    qDebug() << sqlstring;
     if (!qu.exec(sqlstring)) qDebug() << sqlstring << " brachte den Fehler: " << qu.lastError().text();
     int i{0};
     while (qu.next()){
