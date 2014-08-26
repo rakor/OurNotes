@@ -105,7 +105,6 @@ int MainWindow::datenbankversionTesten()
         qDebug() << qu.lastError().text();
     if (qu.next()){
         int schema = qu.value(0).toInt();
-        qDebug() << "Ergebnis is: " << schema;
         if      (schema == DATENBANKVERSION)    ergebnis = 0;
         else if (schema > DATENBANKVERSION)     ergebnis = 1;
     }
@@ -490,7 +489,6 @@ void MainWindow::tabelleFuellen()
 
     sqlstring.append(" ORDER BY Eingetragen_am ASC");
 
-    qDebug() << sqlstring;
     if (!qu.exec(sqlstring)) qDebug() << sqlstring << " brachte den Fehler: " << qu.lastError().text();
     int i{0};
     while (qu.next()){
