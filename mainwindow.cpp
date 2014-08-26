@@ -17,6 +17,21 @@ MainWindow::MainWindow(QWidget *parent)
         }
     }
 
+    switch (datenbankversionTesten()) {
+    case -1 :
+        if (QMessageBox::question(this, "Datenbank zu alt", "Das Datenbankschema scheint von einer älteren Version zu stammen. Soll versucht werden es zu aktuallisieren?") ==
+                QMessageBox::Yes) datenbankschemaAktuallisieren();
+        else exit(0);
+
+        break;
+    case 1:
+        QMessageBox::critical(this, "Datenbank zu neu", "Das Datenbankschema ist zu neu für das Programm. Bitte aktuallisieren sie " PROGNAME);
+        exit (0);
+        break;
+    default:
+        break;
+    }
+
     guiBauen();
     this->resize(800,500);
     textfeld->setFocus();
@@ -79,6 +94,28 @@ QTableWidgetItem *MainWindow::neuesTableItem(QString text, int id, bool tooltip,
     if (tooltip) item->setToolTip(tooltiptext.isEmpty() ? text : tooltiptext);
     if (id != 0) item->setData(Qt::UserRole, id);
     return item;
+}
+
+int MainWindow::datenbankversionTesten()
+{
+    int ergebnis = -1;
+    QSqlQuery qu;
+    qu.clear();
+    if (!qu.exec("SELECT Wert FROM Status WHERE Schluessel='Datenbankschema'"))
+        qDebug() << qu.lastError().text();
+    if (qu.next()){
+        int schema = qu.value(0).toInt();
+        qDebug() << "Ergebnis is: " << schema;
+        if      (schema == DATENBANKVERSION)    ergebnis = 0;
+        else if (schema > DATENBANKVERSION)     ergebnis = 1;
+    }
+    qu.finish();
+    return ergebnis;
+}
+
+bool MainWindow::datenbankschemaAktuallisieren()
+{
+
 }
 
 void MainWindow::guiBauen()
@@ -263,7 +300,7 @@ bool MainWindow::tabellenErstellen()
                                     " Schluessel, Wert"
                                     ") VALUES ("
                                     "'Datenbankschema', "
-                                    "'" DATENBANKVERSION "'"
+                                    "'" + QString::number(DATENBANKVERSION) + "'"
                                     ")");
     qu.finish();
 

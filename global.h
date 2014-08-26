@@ -3,7 +3,7 @@
 
 #define PROGNAME            "OurNotes"
 #define PROGVERSION         "0.0.2a"
-#define DATENBANKVERSION    "1"
+#define DATENBANKVERSION    1
 
 
 #ifdef Q_OS_WIN

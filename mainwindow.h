@@ -72,6 +72,9 @@ protected:
     QLineEdit*          suchfeld{nullptr};
     QComboBox*          themenFilterCombo{nullptr};
     QComboBox*          personenFilterCombo{nullptr};
+    int                 datenbankversionTesten();
+    bool                datenbankschemaAktuallisieren();
+
 
 protected slots:
     void inDatenbankSchreiben();
